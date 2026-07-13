@@ -16,6 +16,15 @@
 
 import Foundation
 
+/// How captured app audio is published when ``ScreenShareCaptureOptions/appAudio`` is enabled.
+@objc
+public enum AppAudioPublishMode: Int, Sendable {
+    /// Mix app audio into the microphone track (default).
+    case mix
+    /// Publish app audio as an independent ``Track/Source/screenShareAudio`` track.
+    case separateTrack
+}
+
 @objcMembers
 public final class ScreenShareCaptureOptions: NSObject, VideoCaptureOptions, Sendable {
     public let dimensions: Dimensions
@@ -28,6 +37,9 @@ public final class ScreenShareCaptureOptions: NSObject, VideoCaptureOptions, Sen
     public let showCursor: Bool
 
     public let appAudio: Bool
+
+    /// How app audio is published when ``appAudio`` is enabled.
+    public let appAudioPublishMode: AppAudioPublishMode
 
     /// Use broadcast extension for screen capture (iOS only).
     ///
@@ -70,6 +82,7 @@ public final class ScreenShareCaptureOptions: NSObject, VideoCaptureOptions, Sen
                 fps: Int = 30,
                 showCursor: Bool = true,
                 appAudio: Bool = false,
+                appAudioPublishMode: AppAudioPublishMode = .mix,
                 useBroadcastExtension: Bool = defaultToBroadcastExtension,
                 useScreenCaptureKit: Bool = true,
                 includeCurrentApplication: Bool = false,
@@ -79,6 +92,7 @@ public final class ScreenShareCaptureOptions: NSObject, VideoCaptureOptions, Sen
         self.fps = fps
         self.showCursor = showCursor
         self.appAudio = appAudio
+        self.appAudioPublishMode = appAudioPublishMode
         self.useBroadcastExtension = useBroadcastExtension
         self.useScreenCaptureKit = useScreenCaptureKit
         self.includeCurrentApplication = includeCurrentApplication
@@ -93,6 +107,7 @@ public final class ScreenShareCaptureOptions: NSObject, VideoCaptureOptions, Sen
             fps == other.fps &&
             showCursor == other.showCursor &&
             appAudio == other.appAudio &&
+            appAudioPublishMode == other.appAudioPublishMode &&
             useBroadcastExtension == other.useBroadcastExtension &&
             useScreenCaptureKit == other.useScreenCaptureKit &&
             includeCurrentApplication == other.includeCurrentApplication &&
@@ -105,6 +120,7 @@ public final class ScreenShareCaptureOptions: NSObject, VideoCaptureOptions, Sen
         hasher.combine(fps)
         hasher.combine(showCursor)
         hasher.combine(appAudio)
+        hasher.combine(appAudioPublishMode)
         hasher.combine(useBroadcastExtension)
         hasher.combine(useScreenCaptureKit)
         hasher.combine(includeCurrentApplication)

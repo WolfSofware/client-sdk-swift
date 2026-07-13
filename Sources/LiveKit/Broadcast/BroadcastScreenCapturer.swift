@@ -28,6 +28,9 @@ class BroadcastScreenCapturer: BufferCapturer, @unchecked Sendable {
     private static let activeReceivers = StateSync(Set<UUID>())
     static var activeCount: Int { activeReceivers.read { $0.count } }
 
+    /// Destination for captured app audio; falls back to the mic mixer.
+    weak var appAudioSink: AppAudioSink?
+
     private let appAudio: Bool
     private let socketPath: SocketPath?
     private let receiverTask = StateSync<(id: UUID, task: AnyTaskCancellable)?>(nil)
@@ -96,7 +99,7 @@ class BroadcastScreenCapturer: BufferCapturer, @unchecked Sendable {
                 for try await sample in receiver.incomingSamples {
                     switch sample {
                     case let .image(buffer, rotation): capture(buffer, rotation: rotation)
-                    case let .audio(buffer): AudioManager.shared.mixer.capture(appAudio: buffer)
+                    case let .audio(buffer): (appAudioSink ?? AudioManager.shared.mixer).capture(appAudio: buffer)
                     }
                 }
             } onCancel: {

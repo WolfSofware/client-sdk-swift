@@ -111,6 +111,7 @@ extension LocalTrackPublication: VideoCapturerDelegate {
             }
 
             try await participant.unpublish(publication: self)
+            try await participant.unpublishAppAudioTrackIfNeeded()
         }
     }
 

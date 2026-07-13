@@ -36,6 +36,9 @@ public class ScreenCapturer: VideoCapturer, @unchecked Sendable {
     /// The ``ScreenShareCaptureOptions`` used for this capturer.
     public let options: ScreenShareCaptureOptions
 
+    /// Destination for captured app audio; falls back to the mic mixer.
+    weak var appAudioSink: AppAudioSink?
+
     struct State {
         var scStream: SCStream?
         // Cached frame for resending to maintain a minimum of 1 fps
@@ -151,7 +154,7 @@ public class ScreenCapturer: VideoCapturer, @unchecked Sendable {
 
         if case .audio = outputType {
             guard let pcm = sampleBuffer.toAVAudioPCMBuffer() else { return }
-            AudioManager.shared.mixer.capture(appAudio: pcm)
+            (appAudioSink ?? AudioManager.shared.mixer).capture(appAudio: pcm)
         } else if case .screen = outputType {
             // Retrieve the array of metadata attachments from the sample buffer.
             guard let attachmentsArray = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer,

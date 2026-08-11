@@ -39,6 +39,9 @@ public class ScreenCapturer: VideoCapturer, @unchecked Sendable {
     /// Destination for captured app audio; falls back to the mic mixer.
     weak var appAudioSink: AppAudioSink?
 
+    // Only written from the SCStream callback queue.
+    private var didWarnMissingAppAudioSink = false
+
     struct State {
         var scStream: SCStream?
         // Cached frame for resending to maintain a minimum of 1 fps
@@ -154,7 +157,20 @@ public class ScreenCapturer: VideoCapturer, @unchecked Sendable {
 
         if case .audio = outputType {
             guard let pcm = sampleBuffer.toAVAudioPCMBuffer() else { return }
-            (appAudioSink ?? AudioManager.shared.mixer).capture(appAudio: pcm)
+            if let appAudioSink {
+                appAudioSink.capture(appAudio: pcm)
+            } else if options.appAudioPublishMode == .separateTrack {
+                // The separate app-audio track's sink is gone, e.g. the audio
+                // track failed to publish or was unpublished mid-share. Drop
+                // the buffer instead of silently mixing app audio back into
+                // the microphone track.
+                if !didWarnMissingAppAudioSink {
+                    didWarnMissingAppAudioSink = true
+                    log("App audio configured as a separate track but no sink is attached, dropping app audio", .warning)
+                }
+            } else {
+                AudioManager.shared.mixer.capture(appAudio: pcm)
+            }
         } else if case .screen = outputType {
             // Retrieve the array of metadata attachments from the sample buffer.
             guard let attachmentsArray = CMSampleBufferGetSampleAttachmentsArray(sampleBuffer,

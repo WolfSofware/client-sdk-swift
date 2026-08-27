@@ -19,14 +19,23 @@ let package = Package(
         ),
     ],
     dependencies: [
-        // LK-Prefixed Dynamic WebRTC XCFramework
-        .package(url: "https://github.com/livekit/webrtc-xcframework.git", exact: "144.7559.11"),
         .package(url: "https://github.com/livekit/livekit-uniffi-xcframework.git", exact: "0.0.6"),
         .package(url: "https://github.com/apple/swift-protobuf.git", from: "1.31.0"),
         // Only used for DocC generation
         .package(url: "https://github.com/apple/swift-docc-plugin.git", from: "1.3.0"),
     ],
     targets: [
+        // Тот же бинарник, что и в `Package.swift`, и по той же причине:
+        // апстримная сборка libwebrtc не содержит `RTCExternalAudioSource`.
+        //
+        // Манифеста ДВА, и свежие toolchain'ы читают именно этот. Правка
+        // только в `Package.swift` не действует вовсе, а выглядит как «Xcode
+        // держится за старую зависимость» — я на это потратил час.
+        .binaryTarget(
+            name: "LiveKitWebRTC",
+            url: "https://github.com/WolfSofware/webrtc-build/releases/download/wolf-144.7559.11-external-audio.1/LiveKitWebRTC.xcframework.zip",
+            checksum: "6aa92bc6e3084566fddaa3f726e0911c06de570b96efdfa521f33feee2b7268f",
+        ),
         .target(
             name: "LKObjCHelpers",
             publicHeadersPath: "include",
@@ -34,7 +43,7 @@ let package = Package(
         .target(
             name: "LiveKit",
             dependencies: [
-                .product(name: "LiveKitWebRTC", package: "webrtc-xcframework"),
+                "LiveKitWebRTC",
                 .product(name: "LiveKitUniFFI", package: "livekit-uniffi-xcframework"),
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
                 "LKObjCHelpers",

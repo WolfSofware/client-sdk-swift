@@ -18,16 +18,27 @@ let package = Package(
         ),
     ],
     dependencies: [
-        // LK-Prefixed Dynamic WebRTC XCFramework
-        // Наша сборка: апстримный бинарник ещё не содержит RTCExternalAudioSource
-        // (webrtc-sdk/webrtc#282 не влит), а весь смысл этой ветки — в нём.
-        .package(url: "https://github.com/WolfSofware/webrtc-xcframework.git", exact: "wolf-144.7559.11-external-audio.1"),
         .package(url: "https://github.com/livekit/livekit-uniffi-xcframework.git", exact: "0.0.6"),
         .package(url: "https://github.com/apple/swift-protobuf.git", from: "1.31.0"),
         // Only used for DocC generation
         .package(url: "https://github.com/apple/swift-docc-plugin.git", from: "1.3.0"),
     ],
     targets: [
+        // Бинарник ПРЯМО здесь, а не отдельным пакетом.
+        //
+        // Отдельным он быть не может: у нашего форка и у апстримного пакета
+        // одно и то же имя `webrtc-xcframework`, а SwiftPM различает пакеты по
+        // имени, а не по адресу. Он молча оставлял апстримную сборку — ту, в
+        // которой нужного нам класса нет, — и сборка падала на несовпадении
+        // делегата.
+        //
+        // Это наша сборка m144 + webrtc-sdk/webrtc#282: в ней есть
+        // `RTCExternalAudioSource`, ради которого ветка и существует.
+        .binaryTarget(
+            name: "LiveKitWebRTC",
+            url: "https://github.com/WolfSofware/webrtc-build/releases/download/wolf-144.7559.11-external-audio.1/LiveKitWebRTC.xcframework.zip",
+            checksum: "6aa92bc6e3084566fddaa3f726e0911c06de570b96efdfa521f33feee2b7268f",
+        ),
         .target(
             name: "LKObjCHelpers",
             publicHeadersPath: "include",
@@ -35,7 +46,7 @@ let package = Package(
         .target(
             name: "LiveKit",
             dependencies: [
-                .product(name: "LiveKitWebRTC", package: "webrtc-xcframework"),
+                "LiveKitWebRTC",
                 .product(name: "LiveKitUniFFI", package: "livekit-uniffi-xcframework"),
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
                 "LKObjCHelpers",

@@ -19,7 +19,9 @@ let package = Package(
     ],
     dependencies: [
         // LK-Prefixed Dynamic WebRTC XCFramework
-        .package(url: "https://github.com/livekit/webrtc-xcframework.git", exact: "144.7559.11"),
+        // Наша сборка: апстримный бинарник ещё не содержит RTCExternalAudioSource
+        // (webrtc-sdk/webrtc#282 не влит), а весь смысл этой ветки — в нём.
+        .package(url: "https://github.com/WolfSofware/webrtc-xcframework.git", exact: "wolf-144.7559.11-external-audio.1"),
         .package(url: "https://github.com/livekit/livekit-uniffi-xcframework.git", exact: "0.0.6"),
         .package(url: "https://github.com/apple/swift-protobuf.git", from: "1.31.0"),
         // Only used for DocC generation

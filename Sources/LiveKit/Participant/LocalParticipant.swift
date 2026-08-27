@@ -513,6 +513,21 @@ public extension LocalParticipant {
 
     /// Creates an independent app-audio track and routes the screen-share
     /// capturer's audio to it, when the capture options request it.
+    ///
+    /// ``setScreenShare(_:)`` and ``set(source:enabled:captureOptions:publishOptions:)``
+    /// call this for you. It is public for apps that build the screen-share
+    /// video track themselves — picking a display or window, then publishing
+    /// via ``publish(videoTrack:options:)`` — since the capturer's audio sink
+    /// must be wired up *before* the track is published, and there is no other
+    /// way to reach it from outside the SDK. Publish the returned track with
+    /// ``AudioPublishOptions`` suited to app audio (a music preset, no DTX).
+    public func prepareAppAudioTrack(options: ScreenShareCaptureOptions,
+                                     videoTrack: LocalVideoTrack) -> LocalAudioTrack?
+    {
+        guard let room = try? requireRoom() else { return nil }
+        return prepareAppAudioTrack(options: options, videoTrack: videoTrack, room: room)
+    }
+
     private func prepareAppAudioTrack(options: ScreenShareCaptureOptions,
                                       videoTrack: LocalVideoTrack,
                                       room: Room) -> LocalAudioTrack?

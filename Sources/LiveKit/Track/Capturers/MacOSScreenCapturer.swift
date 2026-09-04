@@ -55,13 +55,15 @@ public class MacOSScreenCapturer: ScreenCapturer, @unchecked Sendable {
                   let content = displaySource.scContent as? SCShareableContent,
                   let nativeDisplay = displaySource.nativeType as? SCDisplay
         {
-            let includedApps = options.includeCurrentApplication ?
-                content.applications :
-                content.applications.filter { app in Bundle.main.bundleIdentifier != app.bundleIdentifier }
-
             let excludedWindows = content.windows.filter { window in options.excludeWindowIDs.contains(window.windowID) }
-
-            filter = SCContentFilter(display: nativeDisplay, including: includedApps, exceptingWindows: excludedWindows)
+            if options.includeCurrentApplication {
+                filter = SCContentFilter(display: nativeDisplay, excludingWindows: excludedWindows)
+            } else {
+                let includedApps = content.applications.filter {
+                    Bundle.main.bundleIdentifier != $0.bundleIdentifier
+                }
+                filter = SCContentFilter(display: nativeDisplay, including: includedApps, exceptingWindows: excludedWindows)
+            }
         } else {
             log("Unable to resolve SCContentFilter", .error)
             throw LiveKitError(.invalidState, message: "Unable to resolve SCContentFilter")
@@ -82,6 +84,7 @@ public class MacOSScreenCapturer: ScreenCapturer, @unchecked Sendable {
 
         if #available(macOS 13.0, *) {
             configuration.capturesAudio = options.appAudio
+            configuration.excludesCurrentProcessAudio = options.excludeCurrentProcessAudio
         }
 
         let stream = try makeStream(filter: filter, configuration: configuration)

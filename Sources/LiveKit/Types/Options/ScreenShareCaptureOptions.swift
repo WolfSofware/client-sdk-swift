@@ -67,6 +67,9 @@ public final class ScreenShareCaptureOptions: NSObject, VideoCaptureOptions, Sen
 
     public let includeCurrentApplication: Bool
 
+    /// Exclude audio produced by the current process while keeping its windows visible (macOS only).
+    public let excludeCurrentProcessAudio: Bool
+
     /// Exclude windows by their window ID (macOS only).
     public let excludeWindowIDs: [UInt32]
 
@@ -86,6 +89,7 @@ public final class ScreenShareCaptureOptions: NSObject, VideoCaptureOptions, Sen
                 useBroadcastExtension: Bool = defaultToBroadcastExtension,
                 useScreenCaptureKit: Bool = true,
                 includeCurrentApplication: Bool = false,
+                excludeCurrentProcessAudio: Bool = false,
                 excludeWindowIDs: [UInt32] = [])
     {
         self.dimensions = dimensions
@@ -96,6 +100,7 @@ public final class ScreenShareCaptureOptions: NSObject, VideoCaptureOptions, Sen
         self.useBroadcastExtension = useBroadcastExtension
         self.useScreenCaptureKit = useScreenCaptureKit
         self.includeCurrentApplication = includeCurrentApplication
+        self.excludeCurrentProcessAudio = excludeCurrentProcessAudio
         self.excludeWindowIDs = excludeWindowIDs
     }
 
@@ -111,6 +116,7 @@ public final class ScreenShareCaptureOptions: NSObject, VideoCaptureOptions, Sen
             useBroadcastExtension == other.useBroadcastExtension &&
             useScreenCaptureKit == other.useScreenCaptureKit &&
             includeCurrentApplication == other.includeCurrentApplication &&
+            excludeCurrentProcessAudio == other.excludeCurrentProcessAudio &&
             excludeWindowIDs == other.excludeWindowIDs
     }
 
@@ -124,6 +130,7 @@ public final class ScreenShareCaptureOptions: NSObject, VideoCaptureOptions, Sen
         hasher.combine(useBroadcastExtension)
         hasher.combine(useScreenCaptureKit)
         hasher.combine(includeCurrentApplication)
+        hasher.combine(excludeCurrentProcessAudio)
         hasher.combine(excludeWindowIDs)
         return hasher.finalize()
     }

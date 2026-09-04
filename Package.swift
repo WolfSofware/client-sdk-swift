@@ -36,7 +36,7 @@ let package = Package(
         // `RTCExternalAudioSource` и исправленный выбор внешнего микрофона.
         .binaryTarget(
             name: "LiveKitWebRTCMacInput",
-            url: "https://github.com/WolfSofware/webrtc-build/releases/download/wolf-144.7559.11-external-audio-mac-input.4/LiveKitWebRTC.xcframework.zip",
+            url: "https://github.com/WolfSofware/webrtc-build/releases/download/wolf-144.7559.11-external-audio-mac-input.4/LiveKitWebRTC-v4.xcframework.zip",
             checksum: "7bad747a5248a1b7b72ba74402e72d028f4fc4f0e9ac1ee0fb0b7bc64b649c56",
         ),
         .target(

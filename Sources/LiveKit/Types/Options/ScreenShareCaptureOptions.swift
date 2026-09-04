@@ -47,6 +47,9 @@ public final class ScreenShareCaptureOptions: NSObject, VideoCaptureOptions, Sen
 
     public let includeCurrentApplication: Bool
 
+    /// Exclude audio produced by the current process while keeping its windows visible (macOS only).
+    public let excludeCurrentProcessAudio: Bool
+
     /// Exclude windows by their window ID (macOS only).
     public let excludeWindowIDs: [UInt32]
 
@@ -65,6 +68,7 @@ public final class ScreenShareCaptureOptions: NSObject, VideoCaptureOptions, Sen
                 appAudioPublishMode: AppAudioPublishMode = .mix,
                 useBroadcastExtension: Bool = defaultToBroadcastExtension,
                 includeCurrentApplication: Bool = false,
+                excludeCurrentProcessAudio: Bool = false,
                 excludeWindowIDs: [UInt32] = [])
     {
         self.dimensions = dimensions
@@ -74,6 +78,7 @@ public final class ScreenShareCaptureOptions: NSObject, VideoCaptureOptions, Sen
         self.appAudioPublishMode = appAudioPublishMode
         self.useBroadcastExtension = useBroadcastExtension
         self.includeCurrentApplication = includeCurrentApplication
+        self.excludeCurrentProcessAudio = excludeCurrentProcessAudio
         self.excludeWindowIDs = excludeWindowIDs
     }
 
@@ -88,6 +93,7 @@ public final class ScreenShareCaptureOptions: NSObject, VideoCaptureOptions, Sen
             appAudioPublishMode == other.appAudioPublishMode &&
             useBroadcastExtension == other.useBroadcastExtension &&
             includeCurrentApplication == other.includeCurrentApplication &&
+            excludeCurrentProcessAudio == other.excludeCurrentProcessAudio &&
             excludeWindowIDs == other.excludeWindowIDs
     }
 
@@ -100,6 +106,7 @@ public final class ScreenShareCaptureOptions: NSObject, VideoCaptureOptions, Sen
         hasher.combine(appAudioPublishMode)
         hasher.combine(useBroadcastExtension)
         hasher.combine(includeCurrentApplication)
+        hasher.combine(excludeCurrentProcessAudio)
         hasher.combine(excludeWindowIDs)
         return hasher.finalize()
     }

@@ -35,7 +35,7 @@ let package = Package(
         // Это наша macOS-сборка m144 + webrtc-sdk/webrtc#282: в ней есть
         // `RTCExternalAudioSource` и исправленный выбор внешнего микрофона.
         .binaryTarget(
-            name: "LiveKitWebRTC",
+            name: "LiveKitWebRTCMacInput",
             url: "https://github.com/WolfSofware/webrtc-build/releases/download/wolf-144.7559.11-external-audio-mac-input.2/LiveKitWebRTC.xcframework.zip",
             checksum: "c8e2afc6bd07a0cd97e1798c099b10bfbed4c85e67614b11f5f403b98fa20454",
         ),
@@ -46,7 +46,7 @@ let package = Package(
         .target(
             name: "LiveKit",
             dependencies: [
-                "LiveKitWebRTC",
+                "LiveKitWebRTCMacInput",
                 .product(name: "LiveKitUniFFI", package: "livekit-uniffi-xcframework"),
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
                 "LKObjCHelpers",

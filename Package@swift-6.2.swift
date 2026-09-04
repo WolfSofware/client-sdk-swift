@@ -33,8 +33,8 @@ let package = Package(
         // держится за старую зависимость» — я на это потратил час.
         .binaryTarget(
             name: "LiveKitWebRTCMacInput",
-            url: "https://github.com/WolfSofware/webrtc-build/releases/download/wolf-144.7559.11-external-audio-mac-input.3/LiveKitWebRTC.xcframework.zip",
-            checksum: "03a3fe00f9a2607b14ae0edf5cd1573dccdec7c625c9c9409de290b2956ffeed",
+            url: "https://github.com/WolfSofware/webrtc-build/releases/download/wolf-144.7559.11-external-audio-mac-input.4/LiveKitWebRTC.xcframework.zip",
+            checksum: "7bad747a5248a1b7b72ba74402e72d028f4fc4f0e9ac1ee0fb0b7bc64b649c56",
         ),
         .target(
             name: "LKObjCHelpers",

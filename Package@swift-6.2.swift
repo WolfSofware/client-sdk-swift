@@ -32,9 +32,9 @@ let package = Package(
         // только в `Package.swift` не действует вовсе, а выглядит как «Xcode
         // держится за старую зависимость» — я на это потратил час.
         .binaryTarget(
-            name: "LiveKitWebRTC",
-            url: "https://github.com/WolfSofware/webrtc-build/releases/download/wolf-144.7559.11-external-audio-mac-input.1/LiveKitWebRTC.xcframework.zip",
-            checksum: "f2ab2a465fae0016b4fdba5d7047f55001697a8e23ff3657a96bb706ab3d0b01",
+            name: "LiveKitWebRTCMacInput",
+            url: "https://github.com/WolfSofware/webrtc-build/releases/download/wolf-144.7559.11-external-audio-mac-input.2/LiveKitWebRTC.xcframework.zip",
+            checksum: "c8e2afc6bd07a0cd97e1798c099b10bfbed4c85e67614b11f5f403b98fa20454",
         ),
         .target(
             name: "LKObjCHelpers",
@@ -43,7 +43,7 @@ let package = Package(
         .target(
             name: "LiveKit",
             dependencies: [
-                "LiveKitWebRTC",
+                "LiveKitWebRTCMacInput",
                 .product(name: "LiveKitUniFFI", package: "livekit-uniffi-xcframework"),
                 .product(name: "SwiftProtobuf", package: "swift-protobuf"),
                 "LKObjCHelpers",

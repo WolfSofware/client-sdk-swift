@@ -32,12 +32,12 @@ let package = Package(
         // которой нужного нам класса нет, — и сборка падала на несовпадении
         // делегата.
         //
-        // Это наша сборка m144 + webrtc-sdk/webrtc#282: в ней есть
-        // `RTCExternalAudioSource`, ради которого ветка и существует.
+        // Это наша macOS-сборка m144 + webrtc-sdk/webrtc#282: в ней есть
+        // `RTCExternalAudioSource` и исправленный выбор внешнего микрофона.
         .binaryTarget(
             name: "LiveKitWebRTC",
-            url: "https://github.com/WolfSofware/webrtc-build/releases/download/wolf-144.7559.11-external-audio.1/LiveKitWebRTC.xcframework.zip",
-            checksum: "6aa92bc6e3084566fddaa3f726e0911c06de570b96efdfa521f33feee2b7268f",
+            url: "https://github.com/WolfSofware/webrtc-build/releases/download/wolf-144.7559.11-external-audio-mac-input.1/LiveKitWebRTC.xcframework.zip",
+            checksum: "f2ab2a465fae0016b4fdba5d7047f55001697a8e23ff3657a96bb706ab3d0b01",
         ),
         .target(
             name: "LKObjCHelpers",

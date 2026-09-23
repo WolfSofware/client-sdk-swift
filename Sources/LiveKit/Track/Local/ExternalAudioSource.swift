@@ -63,7 +63,7 @@ public final class ExternalAudioSource: Loggable, @unchecked Sendable {
 
     // MARK: - Internal
 
-    let rtcSource: LKRTCExternalAudioSource
+    let rtcSource: LKRTCCustomAudioSource
 
     // MARK: - Private
 

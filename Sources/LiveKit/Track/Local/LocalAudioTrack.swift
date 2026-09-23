@@ -120,10 +120,11 @@ public class LocalAudioTrack: Track, LocalTrackProtocol, AudioTrackProtocol, @un
     {
         let rtcTrack = RTC.createAudioTrack(source: externalSource.rtcSource)
         rtcTrack.isEnabled = true
+        let mediaTrack = RTCMediaTrack(rtcTrack)
 
         return LocalAudioTrack(name: name,
                                source: source,
-                               track: rtcTrack,
+                               track: mediaTrack,
                                reportStatistics: reportStatistics,
                                captureOptions: AudioCaptureOptions(),
                                externalSource: externalSource)

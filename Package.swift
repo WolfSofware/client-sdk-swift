@@ -19,7 +19,6 @@ let package = Package(
     ],
     dependencies: [
         // LK-Prefixed Dynamic WebRTC XCFramework
-        .package(url: "https://github.com/livekit/webrtc-xcframework.git", exact: "150.7871.02"),
         .package(url: "https://github.com/livekit/livekit-uniffi-xcframework.git", exact: "0.1.9"),
         // Test-only: conformance oracle for the nanopb facades.
         .package(url: "https://github.com/apple/swift-protobuf.git", from: "1.31.0"),
@@ -27,6 +26,15 @@ let package = Package(
         .package(url: "https://github.com/apple/swift-docc-plugin.git", from: "1.3.0"),
     ],
     targets: [
+        // Наша сборка libwebrtc: M150 + webrtc-sdk/webrtc#292 (CustomAudioSource)
+        // + правки входа звука на macOS. Ветка WolfSofware/webrtc
+        // `wolf/custom-audio-m150`, собрана в WolfSofware/webrtc-build.
+        // Вольют #292 — возвращаемся на livekit/webrtc-xcframework.
+        .binaryTarget(
+            name: "LiveKitWebRTC",
+            url: "https://github.com/WolfSofware/webrtc-build/releases/download/wolf-150.7871.02-custom-audio-mac-input.1/LiveKitWebRTC.xcframework.zip",
+            checksum: "06a12f0bf766df695d250686aa0f7e7aff2fc33ef5a82c4e27271524b25b7717",
+        ),
         .target(
             name: "CLiveKitProto",
             exclude: ["LICENSE-nanopb.txt", "module.modulemap"],
@@ -48,7 +56,7 @@ let package = Package(
         .target(
             name: "LiveKit",
             dependencies: [
-                .product(name: "LiveKitWebRTC", package: "webrtc-xcframework"),
+                "LiveKitWebRTC",
                 .product(name: "LiveKitUniFFI", package: "livekit-uniffi-xcframework"),
                 "LiveKitNanopb",
                 "LKObjCHelpers",

@@ -39,13 +39,25 @@ public struct ExternalAudioSourceOptions: Sendable {
     /// clock: each push must be exactly 10 ms and is delivered inline.
     public var queueSizeMs: Int
 
+    /// Runs the pushed audio through WebRTC's capture-side processing (echo
+    /// cancellation, noise suppression, gain control as set with
+    /// ``LocalAudioTrack/setAudioProcessingOptions(_:)``).
+    ///
+    /// For microphone audio the app captures itself. The echo reference is
+    /// what the SDK plays out, so remote participants are cancelled. Enable
+    /// it for one source at a time, and only while the SDK is not capturing
+    /// the microphone itself. Needs a 8, 16, 32 or 48 kHz `sampleRate`.
+    public var audioProcessing: Bool
+
     public init(sampleRate: Int = 48000,
                 channels: Int = 2,
-                queueSizeMs: Int = 100)
+                queueSizeMs: Int = 100,
+                audioProcessing: Bool = false)
     {
         self.sampleRate = sampleRate
         self.channels = channels
         self.queueSizeMs = queueSizeMs
+        self.audioProcessing = audioProcessing
     }
 }
 
@@ -57,7 +69,8 @@ public struct ExternalAudioSourceOptions: Sendable {
 /// share instead of mixing it into the microphone track.
 ///
 /// Note: WebRTC capture-side processing (echo cancellation, noise
-/// suppression, gain control) is bypassed for this source by design.
+/// suppression, gain control) is bypassed for this source unless
+/// ``ExternalAudioSourceOptions/audioProcessing`` is set.
 public final class ExternalAudioSource: Loggable, @unchecked Sendable {
     public let options: ExternalAudioSourceOptions
 
@@ -78,7 +91,8 @@ public final class ExternalAudioSource: Loggable, @unchecked Sendable {
     public init(options: ExternalAudioSourceOptions = ExternalAudioSourceOptions()) throws {
         guard let rtcSource = RTC.createExternalAudioSource(sampleRate: options.sampleRate,
                                                             channels: options.channels,
-                                                            queueSizeMs: options.queueSizeMs)
+                                                            queueSizeMs: options.queueSizeMs,
+                                                            audioProcessing: options.audioProcessing)
         else {
             throw LiveKitError(.invalidState, message: "Failed to create external audio source, check options")
         }

@@ -208,10 +208,13 @@ extension RTC {
         blocking { peerConnectionFactory.audioSource(with: constraints) }
     }
 
-    static func createExternalAudioSource(sampleRate: Int, channels: Int, queueSizeMs: Int) -> LKRTCCustomAudioSource? {
+    static func createExternalAudioSource(sampleRate: Int, channels: Int, queueSizeMs: Int,
+                                          audioProcessing: Bool) -> LKRTCCustomAudioSource?
+    {
         blocking { peerConnectionFactory.customAudioSource(withSampleRate: Int32(sampleRate),
                                                            channels: UInt(channels),
-                                                           queueSizeMs: Int32(queueSizeMs)) }
+                                                           queueSizeMs: Int32(queueSizeMs),
+                                                           audioProcessing: audioProcessing) }
     }
 
     static func createAudioTrack(source: LKRTCAudioSource) -> LKRTCAudioTrack {

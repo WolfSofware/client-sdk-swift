@@ -274,6 +274,18 @@ extension Room: SignalClientDelegate {
                 }
 
                 if info.state == .disconnected {
+                    // A newer session may already own this identity: the server
+                    // replaces a duplicate (DUPLICATE_IDENTITY) and the update for
+                    // the new session can arrive before the old one's disconnect.
+                    // Participants are keyed by identity only, so tearing down by
+                    // identity here would remove the NEW session together with its
+                    // tracks — the remote user stays in the room but is never heard
+                    // again. Only disconnect the session this update is about.
+                    if let current = $0.remoteParticipants[infoIdentity]?.sid,
+                       current.stringValue != info.sid
+                    {
+                        continue
+                    }
                     // when it's disconnected, send updates
                     disconnectedParticipantIdentities.append(infoIdentity)
                 } else {

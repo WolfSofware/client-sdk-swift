@@ -30,12 +30,12 @@ let package = Package(
         // Наша сборка libwebrtc: M150 + webrtc-sdk/webrtc#292 (CustomAudioSource)
         // + правки входа звука на macOS + обработка захвата для своего
         // источника (эхо/шум/громкость). Ветка WolfSofware/webrtc
-        // `wolf/custom-audio-apm-m150`, собрана в WolfSofware/webrtc-build.
+        // `wolf/custom-audio-apm-m150-04`, собрана в WolfSofware/webrtc-build.
         // Вольют #292 — возвращаемся на livekit/webrtc-xcframework.
         .binaryTarget(
             name: "LiveKitWebRTC",
-            url: "https://github.com/WolfSofware/webrtc-build/releases/download/wolf-150.7871.02-custom-audio-apm.1/LiveKitWebRTC.xcframework.zip",
-            checksum: "7f8fe2358e53bbd76c5b97a2d204ebc3e3d1327da3ec7d34eec2d35371838e89",
+            url: "https://github.com/WolfSofware/webrtc-build/releases/download/wolf-150.7871.04-custom-audio-apm.1/LiveKitWebRTC.xcframework.zip",
+            checksum: "39568fe4f8d2b4b4fb2422a816db0a3bdd2b999ac18d4345b6caf1739d007b08",
         ),
         .target(
             name: "CLiveKitProto",

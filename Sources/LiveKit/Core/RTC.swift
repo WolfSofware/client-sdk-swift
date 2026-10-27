@@ -202,8 +202,13 @@ extension RTC {
         LKRTCInitializeSSL()
 
         // WARP SPED (DTLS in STUN); SNAP is on `LKRTCConfiguration.liveKitDefault()`.
-        // Both engage only when the server negotiates them.
-        LKRTCPeerConnectionFactory.configureFieldTrials("\(kLKRTCFieldTrialIceHandshakeDtlsKey)/\(kLKRTCFieldTrialEnabledValue)/")
+        // FlexFEC-03: offered and sent for video, repaired by the server with
+        // rtc.flexfec.upstream_enabled; WebRTC skips it for simulcast.
+        // All engage only when the server negotiates them.
+        LKRTCPeerConnectionFactory.configureFieldTrials(
+            "\(kLKRTCFieldTrialIceHandshakeDtlsKey)/\(kLKRTCFieldTrialEnabledValue)/" +
+                "WebRTC-FlexFEC-03/Enabled/WebRTC-FlexFEC-03-Advertised/Enabled/"
+        )
 
         Room.log("Initializing PeerConnectionFactory...")
 

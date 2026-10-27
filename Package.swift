@@ -19,7 +19,7 @@ let package = Package(
     ],
     dependencies: [
         // LK-Prefixed Dynamic WebRTC XCFramework
-        .package(url: "https://github.com/livekit/livekit-ffi-xcframework.git", exact: "0.13.1"),
+        .package(url: "https://github.com/livekit/livekit-ffi-xcframework.git", exact: "0.13.2"),
         // Test-only: conformance oracle for the nanopb facades.
         .package(url: "https://github.com/apple/swift-protobuf.git", from: "1.31.0"),
         // Only used for DocC generation

@@ -69,9 +69,7 @@ extension Livekit_Encryption.TypeEnum {
     }
 }
 
-// WolfTeam: deprecation removed on purpose. We need media-only encryption:
-// 'EncryptionOptions' also encrypts the data channel, which our Tauri clients
-// cannot read yet. Migrate once every client supports data channel encryption.
+@available(*, deprecated, message: "Migrate to 'EncryptionOptions' instead. Important: It will enable data channel encryption by default (requires support from all platforms).")
 @objcMembers
 public final class E2EEOptions: NSObject, Sendable {
     public let keyProvider: BaseKeyProvider

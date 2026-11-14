@@ -752,6 +752,7 @@ extension LocalParticipant {
             let transceiver = try publisher.addTransceiver(with: track.mediaTrack.raw, transceiverInit: transInit, startBitrateKbps: startBitrateKbps)
             try transceiver.set(preferredVideoCodec: videoCodec)
             transceiver.sender.set(degradationPreference: degradationPreference)
+            transceiver.sender.set(fecProtection: publishOptions.fecProtection)
             return RTCSender(transceiver.sender)
         }
         log("[Publish] Added transceiver...")
@@ -992,6 +993,7 @@ extension LocalParticipant {
 
                         self.log("[publish] set degradationPreference to \(degradationPreference)")
                         transceiver.sender.set(degradationPreference: degradationPreference)
+                        transceiver.sender.set(fecProtection: publishOptions.fecProtection)
 
                         if let preferredCodec = publishOptions.preferredCodec {
                             try transceiver.set(preferredVideoCodec: preferredCodec)

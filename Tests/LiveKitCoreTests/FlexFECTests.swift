@@ -45,4 +45,33 @@ import Testing
         #expect(sdp.contains("flexfec-03"), "advertised: WebRTC-FlexFEC-03-Advertised")
         #expect(sdp.contains("a=ssrc-group:FEC-FR"), "sent: WebRTC-FlexFEC-03")
     }
+
+    /// The policy reaches the native sender and survives the read-modify-write
+    /// of other parameter updates (degradation preference, subscribed qualities).
+    @Test func fecProtectionReachesSenderAndSurvivesOtherUpdates() async throws {
+        let transport = try await Transport(config: .liveKitDefault(),
+                                            target: .publisher,
+                                            primary: true,
+                                            delegate: StubDelegate())
+        defer { Task { await transport.close() } }
+
+        let fec = try await RTC.run {
+            let track = RTC.createVideoTrack(source: RTC.createVideoSource(forScreenShare: true))
+            let transInit = LKRTCRtpTransceiverInit()
+            transInit.direction = .sendOnly
+            let sender = try transport.addTransceiver(with: track, transceiverInit: transInit).sender
+            sender.set(fecProtection: FecProtection(mode: .minimum, protectionFactor: 0.1, maxFecFrames: 3))
+            sender.set(degradationPreference: .maintainResolution)
+            sender.set(fecProtection: nil)
+            return sender.parameters.fecProtection.map {
+                ($0.mode, $0.protectionFactor, $0.maxFecFrames?.intValue, $0.keyFrameProtectionFactor?.doubleValue)
+            }
+        }
+
+        let got = try #require(fec, "fecProtection is lost on the sender")
+        #expect(got.0 == .minimum)
+        #expect(got.1 == 0.1)
+        #expect(got.2 == 3)
+        #expect(got.3 == nil)
+    }
 }

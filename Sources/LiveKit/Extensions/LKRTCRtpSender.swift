@@ -33,6 +33,16 @@ extension LKRTCRtpSender: Loggable {
         parameters = _parameters
     }
 
+    /// Sets the FEC policy on this sender; `nil` keeps whatever is set.
+    /// Rejected by libwebrtc (logged, no throw) for out-of-range values.
+    @RTC
+    func set(fecProtection: FecProtection?) {
+        guard let fecProtection else { return }
+        let _parameters = parameters
+        _parameters.fecProtection = fecProtection.toRTCType()
+        parameters = _parameters
+    }
+
     // ...
     @RTC
     func _set(subscribedQualities qualities: [Livekit_SubscribedQuality]) {

@@ -16,6 +16,8 @@
 
 import Foundation
 
+internal import LiveKitWebRTC
+
 @objcMembers
 public final class VideoPublishOptions: NSObject, TrackPublishOptions, Sendable {
     public let name: String?
@@ -41,6 +43,10 @@ public final class VideoPublishOptions: NSObject, TrackPublishOptions, Sendable 
 
     public let streamName: String?
 
+    /// FEC policy of the sender. `nil` leaves libwebrtc's adaptive FEC as is.
+    /// Takes effect only where FEC was negotiated; FlexFEC skips simulcast senders.
+    public let fecProtection: FecProtection?
+
     public init(name: String? = nil,
                 encoding: VideoEncoding? = nil,
                 screenShareEncoding: VideoEncoding? = nil,
@@ -50,7 +56,8 @@ public final class VideoPublishOptions: NSObject, TrackPublishOptions, Sendable 
                 preferredCodec: VideoCodec? = nil,
                 preferredBackupCodec: VideoCodec? = nil,
                 degradationPreference: DegradationPreference = .auto,
-                streamName: String? = nil)
+                streamName: String? = nil,
+                fecProtection: FecProtection? = nil)
     {
         self.name = name
         self.encoding = encoding
@@ -62,6 +69,7 @@ public final class VideoPublishOptions: NSObject, TrackPublishOptions, Sendable 
         self.preferredBackupCodec = preferredBackupCodec
         self.degradationPreference = degradationPreference
         self.streamName = streamName
+        self.fecProtection = fecProtection
     }
 
     // MARK: - Equal
@@ -77,7 +85,8 @@ public final class VideoPublishOptions: NSObject, TrackPublishOptions, Sendable 
             preferredCodec == other.preferredCodec &&
             preferredBackupCodec == other.preferredBackupCodec &&
             degradationPreference == other.degradationPreference &&
-            streamName == other.streamName
+            streamName == other.streamName &&
+            fecProtection == other.fecProtection
     }
 
     override public var hash: Int {
@@ -92,6 +101,53 @@ public final class VideoPublishOptions: NSObject, TrackPublishOptions, Sendable 
         hasher.combine(preferredBackupCodec)
         hasher.combine(degradationPreference)
         hasher.combine(streamName)
+        hasher.combine(fecProtection)
         return hasher.finalize()
+    }
+}
+
+/// Sender-level FEC policy (`RtpParameters::fec_protection`, webrtc-sdk/webrtc#329).
+public struct FecProtection: Hashable, Sendable {
+    public enum Mode: Sendable {
+        /// Derived from the observed loss and RTT (libwebrtc's default).
+        case adaptive
+        /// Always `protectionFactor`, regardless of loss and RTT.
+        case fixed
+        /// Adaptive, but never below `protectionFactor`.
+        case minimum
+        /// No FEC packets, without renegotiation.
+        case disabled
+    }
+
+    public let mode: Mode
+    /// 0...1
+    public let protectionFactor: Double
+    /// Defaults to `protectionFactor`.
+    public let keyFrameProtectionFactor: Double?
+    /// 1...6 frames per FEC block. More frames make small frames cheaper to
+    /// protect at the cost of that many frames of recovery delay.
+    public let maxFecFrames: Int?
+
+    public init(mode: Mode, protectionFactor: Double = 0, keyFrameProtectionFactor: Double? = nil, maxFecFrames: Int? = nil) {
+        self.mode = mode
+        self.protectionFactor = protectionFactor
+        self.keyFrameProtectionFactor = keyFrameProtectionFactor
+        self.maxFecFrames = maxFecFrames
+    }
+}
+
+extension FecProtection {
+    func toRTCType() -> LKRTCRtpFecProtection {
+        let result = LKRTCRtpFecProtection()
+        result.mode = switch mode {
+        case .adaptive: .adaptive
+        case .fixed: .fixed
+        case .minimum: .minimum
+        case .disabled: .disabled
+        }
+        result.protectionFactor = protectionFactor
+        result.keyFrameProtectionFactor = keyFrameProtectionFactor.map { NSNumber(value: $0) }
+        result.maxFecFrames = maxFecFrames.map { NSNumber(value: $0) }
+        return result
     }
 }

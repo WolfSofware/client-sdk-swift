@@ -287,6 +287,18 @@ extension VideoCapturer {
                 options: options)
     }
 
+    /// Asks WebRTC's own adapter to scale frames down to `dimensions`.
+    ///
+    /// Frames handed to WebRTC must not be pre-scaled: when WebRTC adapts an
+    /// `LKRTCCVPixelBuffer` whose adapted size differs from its crop size, it
+    /// applies crop coordinates of the adapted frame to the raw buffer and
+    /// encodes only a corner of it. The size limit goes through here instead.
+    func requestOutputFormat(_ dimensions: Dimensions, fps: Int) {
+        (delegate as? LKRTCVideoSource)?.adaptOutputFormat(toWidth: dimensions.width,
+                                                          height: dimensions.height,
+                                                          fps: Int32(fps))
+    }
+
     // Process the captured frame
     private func _process(frame: LKRTCVideoFrame,
                           capturer: LKRTCVideoCapturer,

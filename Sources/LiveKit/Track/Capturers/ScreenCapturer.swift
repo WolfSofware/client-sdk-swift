@@ -47,6 +47,8 @@ public class ScreenCapturer: VideoCapturer, @unchecked Sendable {
         // Cached frame for resending to maintain a minimum of 1 fps
         var lastFrame: LKRTCVideoFrame?
         var resendTimer: AnyTaskCancellable?
+        // Output size last requested from WebRTC's adapter.
+        var requestedFormat: Dimensions?
     }
 
     let _screenCapturerState = StateSync(State())
@@ -98,20 +100,18 @@ public class ScreenCapturer: VideoCapturer, @unchecked Sendable {
         let timeStamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
         let timeStampNs = Int64(CMTimeGetSeconds(timeStamp) * Double(NSEC_PER_SEC))
 
-        let sourceDimensions = Dimensions(width: Int32((contentRect.width * scaleFactor).rounded(.down)),
-                                          height: Int32((contentRect.height * scaleFactor).rounded(.down)))
-
-        let targetDimensions = sourceDimensions
-            .aspectFit(size: options.dimensions.max)
-            .toEncodeSafeDimensions()
-
-        let rtcPixelBuffer = LKRTCCVPixelBuffer(pixelBuffer: pixelBuffer,
-                                                adaptedWidth: targetDimensions.width,
-                                                adaptedHeight: targetDimensions.height,
-                                                cropWidth: sourceDimensions.width,
-                                                cropHeight: sourceDimensions.height,
-                                                cropX: Int32(contentRect.origin.x * scaleFactor),
-                                                cropY: Int32(contentRect.origin.y * scaleFactor))
+        let (rtcPixelBuffer, targetDimensions) = Self.frameBuffer(pixelBuffer,
+                                                                  contentRect: contentRect,
+                                                                  scaleFactor: scaleFactor,
+                                                                  maxDimension: options.dimensions.max)
+        let formatChanged = _screenCapturerState.mutate {
+            guard $0.requestedFormat != targetDimensions else { return false }
+            $0.requestedFormat = targetDimensions
+            return true
+        }
+        if formatChanged {
+            requestOutputFormat(targetDimensions, fps: options.fps)
+        }
 
         let rtcFrame = LKRTCVideoFrame(buffer: rtcPixelBuffer,
                                        rotation: ._0,
@@ -123,6 +123,32 @@ public class ScreenCapturer: VideoCapturer, @unchecked Sendable {
         }
 
         capture(frame: rtcFrame, capturer: capturer, options: options)
+    }
+
+    /// The content of a captured frame for WebRTC, and the size to cap it to.
+    ///
+    /// The buffer is only cropped to the content, never pre-scaled: WebRTC applies its own
+    /// crop coordinates (taken in the adapted frame's space) to the raw buffer when it scales
+    /// down under load, so a pre-scaled buffer would encode only a corner of the screen. The
+    /// cap goes to WebRTC's adapter instead, with the content's aspect ratio, which keeps it
+    /// from cropping the edges. See `VideoCapturer.requestOutputFormat`.
+    static func frameBuffer(_ pixelBuffer: CVPixelBuffer,
+                            contentRect: CGRect,
+                            scaleFactor: CGFloat,
+                            maxDimension: Int32) -> (LKRTCCVPixelBuffer, Dimensions)
+    {
+        // Even sizes: the encoder takes the crop as is when no scaling is needed.
+        let content = Dimensions(width: Int32((contentRect.width * scaleFactor).rounded(.down)) & ~1,
+                                 height: Int32((contentRect.height * scaleFactor).rounded(.down)) & ~1)
+        let target = content.aspectFit(size: maxDimension).toEncodeSafeDimensions()
+        let buffer = LKRTCCVPixelBuffer(pixelBuffer: pixelBuffer,
+                                        adaptedWidth: content.width,
+                                        adaptedHeight: content.height,
+                                        cropWidth: content.width,
+                                        cropHeight: content.height,
+                                        cropX: Int32(contentRect.origin.x * scaleFactor),
+                                        cropY: Int32(contentRect.origin.y * scaleFactor))
+        return (buffer, target)
     }
 
     private func capturePreviousFrame() async throws {

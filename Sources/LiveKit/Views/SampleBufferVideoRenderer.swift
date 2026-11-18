@@ -82,10 +82,34 @@ extension SampleBufferVideoRenderer: LKRTCVideoRenderer {
         }
 
         Task { @MainActor in
-            self.sampleBufferDisplayLayer.enqueue(sampleBuffer)
+            self.enqueue(sampleBuffer)
             if didUpdateRotation {
                 self.setNeedsLayout()
             }
+        }
+    }
+}
+
+extension SampleBufferVideoRenderer {
+    /// After a failure (format change, display sleep, decode error) the layer
+    /// silently stops showing new frames until it is flushed: frames keep
+    /// arriving, the picture stays frozen. Reset it before enqueueing.
+    @MainActor
+    func enqueue(_ sampleBuffer: CMSampleBuffer) {
+        if #available(macOS 14.0, iOS 17.0, tvOS 17.0, visionOS 1.0, *) {
+            let renderer = sampleBufferDisplayLayer.sampleBufferRenderer
+            if renderer.status == .failed || renderer.requiresFlushToResumeDecoding {
+                log("Sample buffer renderer \(renderer.status == .failed ? "failed: \(String(describing: renderer.error))" : "needs flush"), flushing", .warning)
+                renderer.flush()
+            }
+            renderer.enqueue(sampleBuffer)
+        } else {
+            let layer = sampleBufferDisplayLayer
+            if layer.status == .failed || layer.requiresFlushToResumeDecoding {
+                log("Sample buffer display layer \(layer.status == .failed ? "failed: \(String(describing: layer.error))" : "needs flush"), flushing", .warning)
+                layer.flush()
+            }
+            layer.enqueue(sampleBuffer)
         }
     }
 }

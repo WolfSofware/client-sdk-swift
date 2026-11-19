@@ -601,7 +601,8 @@ public extension LocalParticipant {
                         do {
                             try await self._publish(track: appAudioTrack, options: AudioPublishOptions(encoding: .presetMusicHighQualityStereo,
                                                                                                        dtx: false,
-                                                                                                       red: false))
+                                                                                                       red: false,
+                                                                                                       stereo: true))
                         } catch {
                             // Screen share continues without app audio. The
                             // capturer's sink goes away with the track, so
@@ -625,7 +626,8 @@ public extension LocalParticipant {
                             do {
                                 try await self._publish(track: appAudioTrack, options: AudioPublishOptions(encoding: .presetMusicHighQualityStereo,
                                                                                                            dtx: false,
-                                                                                                           red: false))
+                                                                                                           red: false,
+                                                                                                           stereo: true))
                             } catch {
                                 // Screen share continues without app audio.
                                 // The capturer's sink goes away with the
@@ -950,6 +952,7 @@ extension LocalParticipant {
                     populator.disableDtx = !audioPublishOptions.dtx
                     populator.disableRed = !audioPublishOptions.red
                     populator.audioFeatures = Array(audioPublishOptions.toFeatures())
+                    populator.stereo = audioPublishOptions.stereo
 
                     if let streamName = options?.streamName {
                         // Set stream name if specified in options

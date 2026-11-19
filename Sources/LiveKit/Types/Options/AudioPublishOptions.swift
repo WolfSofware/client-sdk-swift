@@ -31,12 +31,20 @@ public final class AudioPublishOptions: NSObject, TrackPublishOptions, Sendable 
 
     public let preConnect: Bool
 
+    /// Publish the track as stereo.
+    ///
+    /// The server confirms `stereo=1` to the publisher only for tracks carrying the
+    /// `TF_STEREO` feature. Without it libwebrtc encodes a stereo source as mono, in
+    /// Opus VoIP mode, which high-passes and tunes for speech.
+    public let stereo: Bool
+
     public init(name: String? = nil,
                 encoding: AudioEncoding? = nil,
                 dtx: Bool = true,
                 red: Bool = true,
                 streamName: String? = nil,
-                preConnect: Bool = false)
+                preConnect: Bool = false,
+                stereo: Bool = false)
     {
         self.name = name
         self.encoding = encoding
@@ -44,6 +52,7 @@ public final class AudioPublishOptions: NSObject, TrackPublishOptions, Sendable 
         self.red = red
         self.streamName = streamName
         self.preConnect = preConnect
+        self.stereo = stereo
     }
 
     // MARK: - Equal
@@ -55,7 +64,8 @@ public final class AudioPublishOptions: NSObject, TrackPublishOptions, Sendable 
             dtx == other.dtx &&
             red == other.red &&
             streamName == other.streamName &&
-            preConnect == other.preConnect
+            preConnect == other.preConnect &&
+            stereo == other.stereo
     }
 
     override public var hash: Int {
@@ -66,6 +76,7 @@ public final class AudioPublishOptions: NSObject, TrackPublishOptions, Sendable 
         hasher.combine(red)
         hasher.combine(streamName)
         hasher.combine(preConnect)
+        hasher.combine(stereo)
         return hasher.finalize()
     }
 }
@@ -76,6 +87,7 @@ extension AudioPublishOptions {
         Set([
             !dtx ? .tfNoDtx : nil,
             preConnect ? .tfPreconnectBuffer : nil,
+            stereo ? .tfStereo : nil,
         ].compactMap(\.self))
     }
 }
@@ -89,6 +101,7 @@ extension AudioPublishOptions {
             red: red,
             streamName: streamName,
             preConnect: enabled,
+            stereo: stereo,
         )
     }
 }

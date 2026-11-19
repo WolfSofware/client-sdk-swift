@@ -71,10 +71,17 @@ public class MacOSScreenCapturer: ScreenCapturer, @unchecked Sendable {
 
         let configuration = SCStreamConfiguration()
 
-        let mainDisplay = CGMainDisplayID()
-        // try to capture in max resolution
-        configuration.width = CGDisplayPixelsWide(mainDisplay) * 2
-        configuration.height = CGDisplayPixelsHigh(mainDisplay) * 2
+        // A display is captured at its own backing size: sizing every source by the main
+        // display shrank an external display bigger than it, or stretched a smaller one.
+        if let display = captureSource as? MacOSDisplay, let mode = CGDisplayCopyDisplayMode(display.displayID) {
+            configuration.width = mode.pixelWidth
+            configuration.height = mode.pixelHeight
+        } else {
+            let mainDisplay = CGMainDisplayID()
+            // try to capture in max resolution
+            configuration.width = CGDisplayPixelsWide(mainDisplay) * 2
+            configuration.height = CGDisplayPixelsHigh(mainDisplay) * 2
+        }
 
         configuration.scalesToFit = false
         configuration.minimumFrameInterval = CMTime(value: 1, timescale: CMTimeScale(options.fps))
